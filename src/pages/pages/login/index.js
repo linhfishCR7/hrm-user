@@ -1,6 +1,5 @@
 // ** React Imports
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -116,7 +115,7 @@ const LoginPage = () => {
               description: 'Vui lòng liên hệ Admin để biết thêm chi tiết',
               placement: 'topRight'
             })
-            router.push('/login')
+            router.push('/pages/login')
           } else {
             router.push('/')
           }
