@@ -1,5 +1,6 @@
 // ** React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -39,6 +40,13 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
+// ** Custom
+import UserPool from 'src/utils/UserPool'
+import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
+import axios from 'src/utils/axios'
+import getProfile from 'src/utils/getProfile'
+import openNotificationWithIcon from 'src/utils/notification'
+
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: { width: '28rem' }
@@ -64,6 +72,9 @@ const LoginPage = () => {
     showPassword: false
   })
 
+  const user = UserPool.getCurrentUser()
+  const [email, setEmail] = useState('')
+
   // ** Hook
   const theme = useTheme()
   const router = useRouter()
@@ -78,6 +89,49 @@ const LoginPage = () => {
 
   const handleMouseDownPassword = event => {
     event.preventDefault()
+  }
+
+  useEffect(() => {
+    if (user) {
+      router.push('/')
+    }
+  })
+
+  const onSubmit = event => {
+    event.preventDefault()
+    const user = new CognitoUser({ Username: email, Pool: UserPool })
+    const authDetails = new AuthenticationDetails({ Username: email, Password: values.password })
+
+    user.authenticateUser(authDetails, {
+      onSuccess: data => {
+        const token = data.idToken.jwtToken
+        localStorage.setItem('token', token)
+        getProfile().then(results => {
+          if (results.data.is_active === false) {
+            user.signOut()
+            localStorage.removeItem('token')
+            openNotificationWithIcon({
+              type: 'error',
+              message: 'Tài khoản đã bị khoá bởi Admin',
+              description: 'Vui lòng liên hệ Admin để biết thêm chi tiết',
+              placement: 'topRight'
+            })
+            router.push('/login')
+          } else {
+            router.push('/')
+          }
+        })
+      },
+      onFailure: err => {
+        openNotificationWithIcon({
+          type: 'error',
+          message: err.message || JSON.stringify(err),
+          description: '',
+          placement: 'topRight'
+        })
+      },
+      newPasswordRequired: data => {}
+    })
   }
 
   return (
@@ -159,16 +213,26 @@ const LoginPage = () => {
           </Box>
           <Box sx={{ mb: 6 }}>
             <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
-              Welcome to {themeConfig.templateName}! 👋🏻
+              Chào Mừng Bạn {themeConfig.templateName}! 👋🏻
             </Typography>
-            <Typography variant='body2'>Please sign-in to your account and start the adventure</Typography>
+            <Typography variant='body2'>Vui lòng đăng nhập đến vào hệ thống</Typography>
           </Box>
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-            <TextField autoFocus fullWidth id='email' label='Email' sx={{ marginBottom: 4 }} />
+          <form noValidate autoComplete='off' onSubmit={onSubmit}>
+            <TextField
+              autoFocus
+              fullWidth
+              id='email'
+              label='Email'
+              sx={{ marginBottom: 4 }}
+              value={email}
+              onChange={event => setEmail(event.target.value)}
+              required
+            />
             <FormControl fullWidth>
-              <InputLabel htmlFor='auth-login-password'>Password</InputLabel>
+              <InputLabel htmlFor='auth-login-password'>Mật Khẩu</InputLabel>
               <OutlinedInput
-                label='Password'
+                label='Mật khẩu'
+                required
                 value={values.password}
                 id='auth-login-password'
                 onChange={handleChange('password')}
@@ -190,31 +254,25 @@ const LoginPage = () => {
             <Box
               sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
             >
-              <FormControlLabel control={<Checkbox />} label='Remember Me' />
+              {/* <FormControlLabel control={<Checkbox />} label='Remember Me' /> */}
               <Link passHref href='/'>
-                <LinkStyled onClick={e => e.preventDefault()}>Forgot Password?</LinkStyled>
+                <LinkStyled onClick={e => e.preventDefault()}>Quên mật khẩu?</LinkStyled>
               </Link>
             </Box>
-            <Button
-              fullWidth
-              size='large'
-              variant='contained'
-              sx={{ marginBottom: 7 }}
-              onClick={() => router.push('/')}
-            >
-              Login
+            <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }} type='submit'>
+              Đăng Nhập
             </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Typography variant='body2' sx={{ marginRight: 2 }}>
-                New on our platform?
+                Lần đầu đến với hệ thống?
               </Typography>
               <Typography variant='body2'>
                 <Link passHref href='/pages/register'>
-                  <LinkStyled>Create an account</LinkStyled>
+                  <LinkStyled>Tạo tài khoản</LinkStyled>
                 </Link>
               </Typography>
             </Box>
-            <Divider sx={{ my: 5 }}>or</Divider>
+            {/* <Divider sx={{ my: 5 }}>or</Divider>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Link href='/' passHref>
                 <IconButton component='a' onClick={e => e.preventDefault()}>
@@ -238,7 +296,7 @@ const LoginPage = () => {
                   <Google sx={{ color: '#db4437' }} />
                 </IconButton>
               </Link>
-            </Box>
+            </Box> */}
           </form>
         </CardContent>
       </Card>
