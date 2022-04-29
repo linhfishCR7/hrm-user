@@ -283,7 +283,7 @@ const RegisterPage = () => {
               </Box>
             )}
 
-            <form noValidate autoComplete='off' onSubmit={onSubmit} className={success ? 'hide' : ''}>
+            <form autoComplete='off' onSubmit={onSubmit} className={success ? 'hide' : ''}>
               <TextField
                 fullWidth
                 autoFocus
@@ -348,7 +348,7 @@ const RegisterPage = () => {
                 </Typography>
               </Box>
             </form>
-            <form noValidate autoComplete='off' onSubmit={onSubmitConfirm} className={success ? '' : 'hide'}>
+            <form autoComplete='off' onSubmit={onSubmitConfirm} className={success ? '' : 'hide'}>
               <TextField
                 fullWidth
                 type='email'
@@ -456,7 +456,7 @@ const RegisterPage = () => {
               <Typography variant='body2'>Còn bước cuối cùng để hoàn tất</Typography>
             </Box>
 
-            <form noValidate autoComplete='off' onSubmit={onSubmitCreateStaff}>
+            <form autoComplete='off' onSubmit={onSubmitCreateStaff}>
               {/* <TextField autoFocus fullWidth id='username' label='Username' sx={{ marginBottom: 4 }} /> */}
               <TextField
                 fullWidth

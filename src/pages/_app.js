@@ -1,6 +1,7 @@
 // ** Next Imports
 import Head from 'next/head'
 import { Router } from 'next/router'
+import { useCallback, useEffect } from 'react'
 
 // ** Loader Import
 import NProgress from 'nprogress'
@@ -53,10 +54,7 @@ const App = props => {
     <CacheProvider value={emotionCache}>
       <Head>
         <title>{`${themeConfig.templateName} - HRM`}</title>
-        <meta
-          name='description'
-          content={`${themeConfig.templateName} – Hệ Thống Quản Lý Nhân Sự HRM`}
-        />
+        <meta name='description' content={`${themeConfig.templateName} - Hệ Thống Quản Lý Nhân Sự HRM`} />
         <meta name='keywords' content='HRM, havanlinh, Admin' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>

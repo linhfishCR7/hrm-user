@@ -53,7 +53,12 @@ const TabAccount = () => {
   const onChange = file => {
     const reader = new FileReader()
     const { files } = file.target
+    console.log(files)
     if (files && files.length !== 0) {
+      console.log(files.length)
+      console.log(reader.result)
+      console.log(files[0])
+
       reader.onload = () => setImgSrc(reader.result)
       reader.readAsDataURL(files[0])
     }
@@ -73,7 +78,7 @@ const TabAccount = () => {
                     hidden
                     type='file'
                     onChange={onChange}
-                    accept='image/png, image/jpeg'
+                    accept='image/png, image/jpeg, image/jpg'
                     id='account-settings-upload-image'
                   />
                 </ButtonStyled>
@@ -81,7 +86,7 @@ const TabAccount = () => {
                   Reset
                 </ResetButtonStyled>
                 <Typography variant='body2' sx={{ marginTop: 5 }}>
-                  Allowed PNG or JPEG. Max size of 800K.
+                  Allowed PNG, JPG or JPEG.
                 </Typography>
               </Box>
             </Box>
