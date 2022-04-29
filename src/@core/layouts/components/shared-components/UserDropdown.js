@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -23,6 +23,12 @@ import AccountOutline from 'mdi-material-ui/AccountOutline'
 import MessageOutline from 'mdi-material-ui/MessageOutline'
 import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
 
+// ** Custom
+import UserPool from 'src/utils/UserPool'
+import getProfile from 'src/utils/getProfile'
+import openNotificationWithIcon from 'src/utils/notification'
+import getTokenFCM from 'src/utils/getTokenFCM'
+
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
   width: 8,
@@ -35,7 +41,10 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 const UserDropdown = () => {
   // ** States
   const [anchorEl, setAnchorEl] = useState(null)
-
+  const user = UserPool.getCurrentUser()
+  const [data, setData] = useState()
+  const [name, setName] = useState()
+  const [isTokenFound, setTokenFound] = useState(false)
   // ** Hooks
   const router = useRouter()
 
@@ -64,6 +73,49 @@ const UserDropdown = () => {
     }
   }
 
+  useEffect(() => {
+    getProfile()
+      .then(results => {
+        getTokenFCM(setTokenFound, results.data.id)
+        setData(results.data.image.image_s3_url)
+        setName(results.data.last_name + ' ' + results.data.first_name)
+        if (results.data.is_active === false) {
+          openNotificationWithIcon({
+            type: 'error',
+            message: 'Tài khoản đã bị khoá bởi Admin',
+            description: 'Vui lòng liên hệ Admin để biết thêm chi tiết',
+            placement: 'topRight'
+          })
+          user.signOut()
+          localStorage.removeItem('token')
+          router.push('/pages/login')
+        }
+      })
+      .catch(error => {
+        if (error.response) {
+          if (error.response.data.code === 'AUTH_0') {
+            openNotificationWithIcon({
+              type: 'error',
+              message: 'Bạn đã hết phiên làm việc. Vui lòng đăng nhập lại',
+              description: '',
+              placement: 'topRight'
+            })
+            user.signOut()
+            localStorage.removeItem('token')
+            router.push('/pages/login')
+          }
+        }
+      })
+  }, [])
+
+  const logout = event => {
+    if (user) {
+      user.signOut()
+      localStorage.removeItem('token')
+      router.push('/pages/login')
+    }
+  }
+
   return (
     <Fragment>
       <Badge
@@ -73,12 +125,7 @@ const UserDropdown = () => {
         badgeContent={<BadgeContentSpan />}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Avatar
-          alt='John Doe'
-          onClick={handleDropdownOpen}
-          sx={{ width: 40, height: 40 }}
-          src='/images/avatars/1.png'
-        />
+        <Avatar alt='Avatar' onClick={handleDropdownOpen} sx={{ width: 40, height: 40 }} src={data} />
       </Badge>
       <Menu
         anchorEl={anchorEl}
@@ -95,12 +142,12 @@ const UserDropdown = () => {
               badgeContent={<BadgeContentSpan />}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-              <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar alt='Avatar' src={data} sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{name}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                Admin
+                Nhân Viên
               </Typography>
             </Box>
           </Box>
@@ -144,7 +191,7 @@ const UserDropdown = () => {
           </Box>
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose('/pages/login')}>
+        <MenuItem sx={{ py: 2 }} onClick={logout}>
           <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
           Logout
         </MenuItem>

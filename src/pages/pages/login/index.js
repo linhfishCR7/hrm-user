@@ -216,7 +216,7 @@ const LoginPage = () => {
             </Typography>
             <Typography variant='body2'>Vui lòng đăng nhập đến vào hệ thống</Typography>
           </Box>
-          <form noValidate autoComplete='off' onSubmit={onSubmit}>
+          <form autoComplete='off' onSubmit={onSubmit}>
             <TextField
               autoFocus
               fullWidth
