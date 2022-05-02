@@ -1,5 +1,6 @@
 // ** React Imports
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -21,7 +22,16 @@ import KeyOutline from 'mdi-material-ui/KeyOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
 import LockOpenOutline from 'mdi-material-ui/LockOpenOutline'
 
+// ** Custom
+import { USER_POOL_ID, REGION, CLIENT_ID } from 'src/constants/Config'
+import { Auth, Amplify } from 'aws-amplify'
+import openNotificationWithIcon from 'src/utils/notification'
+import Loading from 'src/utils/loading'
+
 const TabSecurity = () => {
+  // ** Hook
+  const router = useRouter()
+
   // ** States
   const [values, setValues] = useState({
     newPassword: '',
@@ -31,6 +41,19 @@ const TabSecurity = () => {
     showCurrentPassword: false,
     showConfirmNewPassword: false
   })
+  const [isChanging, setIsChanging] = useState(false)
+  const [error, setError] = useState(false)
+  const [loading_spin, setLoadingSpin] = useState(false)
+
+  try {
+    Amplify.configure({
+      Auth: {
+        userPoolId: USER_POOL_ID,
+        region: REGION,
+        userPoolWebClientId: CLIENT_ID
+      }
+    })
+  } catch (error) {}
 
   // Handle Current Password
   const handleCurrentPasswordChange = prop => event => {
@@ -71,21 +94,59 @@ const TabSecurity = () => {
     event.preventDefault()
   }
 
+  const handleChangeClick = async event => {
+    setLoading(true)
+    event.preventDefault()
+    setIsChanging(true)
+    if (values.newPassword === values.confirmNewPassword) {
+      try {
+        const currentUser = await Auth.currentAuthenticatedUser()
+        await Auth.changePassword(currentUser, values.currentPassword, values.newPassword)
+        setLoading(false)
+        openNotificationWithIcon({
+          type: 'success',
+          message: 'Đổi mật khẩu thành công!!!',
+          description: '',
+          placement: 'topRight'
+        })
+      } catch (error) {
+        setError(true)
+        openNotificationWithIcon({
+          type: 'error',
+          message: 'Đổi mật khẩu không thành công!!!',
+          description: error.message || JSON.stringify(error),
+          placement: 'topRight'
+        })
+        setIsChanging(false)
+      }
+    } else {
+      openNotificationWithIcon({
+        type: 'error',
+        message: 'Xác Nhận Lại Mật Khẩu Không Đúng!!!',
+        description: '',
+        placement: 'topRight'
+      })
+    }
+  }
+
   return (
-    <form>
+    <>
+    <Loading loading={loading_spin} />
+    <form onSubmit={handleChangeClick}>
       <CardContent sx={{ paddingBottom: 0 }}>
         <Grid container spacing={5}>
           <Grid item xs={12} sm={6}>
             <Grid container spacing={5}>
               <Grid item xs={12} sx={{ marginTop: 4.75 }}>
                 <FormControl fullWidth>
-                  <InputLabel htmlFor='account-settings-current-password'>Current Password</InputLabel>
+                  <InputLabel htmlFor='account-settings-current-password'>Mật Khẩu Hiện Tại</InputLabel>
                   <OutlinedInput
-                    label='Current Password'
+                    label='Mật Khẩu Hiện Tại'
                     value={values.currentPassword}
                     id='account-settings-current-password'
                     type={values.showCurrentPassword ? 'text' : 'password'}
                     onChange={handleCurrentPasswordChange('currentPassword')}
+                    required
                     endAdornment={
                       <InputAdornment position='end'>
                         <IconButton
@@ -104,13 +165,14 @@ const TabSecurity = () => {
 
               <Grid item xs={12} sx={{ marginTop: 6 }}>
                 <FormControl fullWidth>
-                  <InputLabel htmlFor='account-settings-new-password'>New Password</InputLabel>
+                  <InputLabel htmlFor='account-settings-new-password'>Mật Khẩu Mới</InputLabel>
                   <OutlinedInput
-                    label='New Password'
+                    label='Mật Khẩu Mới'
                     value={values.newPassword}
                     id='account-settings-new-password'
                     onChange={handleNewPasswordChange('newPassword')}
                     type={values.showNewPassword ? 'text' : 'password'}
+                    required
                     endAdornment={
                       <InputAdornment position='end'>
                         <IconButton
@@ -129,13 +191,14 @@ const TabSecurity = () => {
 
               <Grid item xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel htmlFor='account-settings-confirm-new-password'>Confirm New Password</InputLabel>
+                  <InputLabel htmlFor='account-settings-confirm-new-password'>Xác Nhận Lại Mật Khẩu Mới</InputLabel>
                   <OutlinedInput
-                    label='Confirm New Password'
+                    label='Xác Nhận Lại Mật Khẩu Mới'
                     value={values.confirmNewPassword}
                     id='account-settings-confirm-new-password'
                     type={values.showConfirmNewPassword ? 'text' : 'password'}
                     onChange={handleConfirmNewPasswordChange('confirmNewPassword')}
+                    required
                     endAdornment={
                       <InputAdornment position='end'>
                         <IconButton
@@ -168,7 +231,7 @@ const TabSecurity = () => {
       <Divider sx={{ margin: 0 }} />
 
       <CardContent>
-        <Box sx={{ mt: 1.75, display: 'flex', alignItems: 'center' }}>
+        {/* <Box sx={{ mt: 1.75, display: 'flex', alignItems: 'center' }}>
           <KeyOutline sx={{ marginRight: 3 }} />
           <Typography variant='h6'>Two-factor authentication</Typography>
         </Box>
@@ -197,11 +260,11 @@ const TabSecurity = () => {
               a password to log in. Learn more.
             </Typography>
           </Box>
-        </Box>
+        </Box> */}
 
         <Box sx={{ mt: 11 }}>
-          <Button variant='contained' sx={{ marginRight: 3.5 }}>
-            Save Changes
+          <Button variant='contained' sx={{ marginRight: 3.5 }} type='submit'>
+            Lưu
           </Button>
           <Button
             type='reset'
@@ -214,6 +277,8 @@ const TabSecurity = () => {
         </Box>
       </CardContent>
     </form>
+    </>
+    
   )
 }
 
