@@ -1,18 +1,20 @@
 // ** React Imports
-import { useEffect, useState } from 'react'
+import { useState, Fragment, useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 // ** Next Imports
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 
 // ** MUI Components
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Checkbox from '@mui/material/Checkbox'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
-import InputLabel from '@mui/material/InputLabel'
 import Typography from '@mui/material/Typography'
+import InputLabel from '@mui/material/InputLabel'
 import IconButton from '@mui/material/IconButton'
 import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
@@ -23,10 +25,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
 
 // ** Icons Imports
-import Google from 'mdi-material-ui/Google'
-import Github from 'mdi-material-ui/Github'
-import Twitter from 'mdi-material-ui/Twitter'
-import Facebook from 'mdi-material-ui/Facebook'
 import EyeOutline from 'mdi-material-ui/EyeOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
 
@@ -40,10 +38,9 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
 // ** Custom
+import { USER_POOL_ID, REGION, CLIENT_ID } from 'src/constants/Config'
 import UserPool from 'src/utils/UserPool'
-import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
-import axios from 'src/utils/axios'
-import getProfile from 'src/utils/getProfile'
+import { Auth, Amplify } from 'aws-amplify'
 import openNotificationWithIcon from 'src/utils/notification'
 
 // ** Styled Components
@@ -58,23 +55,28 @@ const LinkStyled = styled('a')(({ theme }) => ({
 }))
 
 const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
+  marginTop: theme.spacing(1.5),
+  marginBottom: theme.spacing(4),
   '& .MuiFormControlLabel-label': {
     fontSize: '0.875rem',
     color: theme.palette.text.secondary
   }
 }))
 
-const LoginPage = () => {
-  // ** State
+const ForgotPassword = () => {
+  // ** States
   const [values, setValues] = useState({
-    password: '',
+    newPassword: '',
     showPassword: false
   })
-
-  const user = UserPool.getCurrentUser()
+  const user_logged = UserPool.getCurrentUser()
   const [email, setEmail] = useState('')
-  const [failer, setFailer] = useState(false)
   const [code, setCode] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [codeSent, setCodeSent] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [isSendingCode, setIsSendingCode] = useState(false)
 
   // ** Hook
   const theme = useTheme()
@@ -92,70 +94,73 @@ const LoginPage = () => {
     event.preventDefault()
   }
 
+  try {
+    Amplify.configure({
+      Auth: {
+        userPoolId: USER_POOL_ID,
+        region: REGION,
+        userPoolWebClientId: CLIENT_ID
+      }
+    })
+  } catch (error) {}
+
+  const handleSendCodeClick = async event => {
+    event.preventDefault()
+
+    setIsSendingCode(true)
+
+    try {
+      await Auth.forgotPassword(email)
+      setCodeSent(true)
+      setSuccess(true)
+      openNotificationWithIcon({
+        type: 'success',
+        message: 'Vui kiểm tra email đến lấy mã code',
+        description: '',
+        placement: 'topRight'
+      })
+    } catch (error) {
+      openNotificationWithIcon({
+        type: 'error',
+        message: error.message || JSON.stringify(error),
+        description: '',
+        placement: 'topRight'
+      })
+      setIsSendingCode(false)
+    }
+  }
+
+  const handleConfirmClick = async event => {
+    event.preventDefault()
+
+    setIsConfirming(true)
+    try {
+      await Auth.forgotPasswordSubmit(email, code, values.newPassword)
+      setConfirmed(true)
+      openNotificationWithIcon({
+        type: 'success',
+        message: 'Đã tạo mật khẩu mới thành công!!!',
+        description: '',
+        placement: 'topRight'
+      })
+      router.push('/pages/login')
+    } catch (error) {
+      openNotificationWithIcon({
+        type: 'error',
+        message: error.message || JSON.stringify(error),
+        description: '',
+        placement: 'topRight'
+      })
+      setIsConfirming(false)
+    }
+  }
+
   useEffect(() => {
-    if (user) {
+    if (user_logged) {
       router.push('/')
     }
   })
 
-  const onSubmit = event => {
-    event.preventDefault()
-    const user = new CognitoUser({ Username: email, Pool: UserPool })
-    const authDetails = new AuthenticationDetails({ Username: email, Password: values.password })
-    user.authenticateUser(authDetails, {
-      onSuccess: data => {
-        const token = data.idToken.jwtToken
-        localStorage.setItem('token', token)
-        getProfile().then(results => {
-          if (results.data.is_active === false) {
-            user.signOut()
-            localStorage.removeItem('token')
-            openNotificationWithIcon({
-              type: 'error',
-              message: 'Tài khoản đã bị khoá bởi Admin',
-              description: 'Vui lòng liên hệ Admin để biết thêm chi tiết',
-              placement: 'topRight'
-            })
-            router.push('/pages/login')
-          } else {
-            router.push('/')
-          }
-        })
-      },
-      onFailure: err => {
-        if(err.message==='User is not confirmed.'){
-          setFailer(true)
-        }
-        console.log(failer)
-        openNotificationWithIcon({
-          type: 'error',
-          message: err.message || JSON.stringify(err),
-          description: '',
-          placement: 'topRight'
-        })
-      },
-      newPasswordRequired: data => {}
-    })
-  }
-
-  const onSubmitConfirm = event => {
-    event.preventDefault()
-    const user = new CognitoUser({ Username: email, Pool: UserPool })
-    user.confirmRegistration(code, true, function (err, result) {
-      if (err) {
-        openNotificationWithIcon({
-          type: 'error',
-          message: err.message || JSON.stringify(err),
-          description: '',
-          placement: 'topRight'
-        })
-      } else {
-        setFailer(false)
-        router.push('/pages/login')
-      }
-    })
-  }
-  
   return (
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
@@ -233,104 +238,47 @@ const LoginPage = () => {
               {themeConfig.templateName}
             </Typography>
           </Box>
-          {failer ? (
+          {success ? (
             <Box sx={{ mb: 6 }}>
               <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
-                Xác Nhận Tài Khoản 🚀
+                Reset Mật Khẩu 🚀
               </Typography>
               <Typography variant='body2'>Nhập mã code từ email của bạn</Typography>
             </Box>
           ) : (
             <Box sx={{ mb: 6 }}>
               <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
-                Chào Mừng Bạn {themeConfig.templateName}! 👋🏻
+                Quên Mẩt Khẩu Của Bạn 🚀
               </Typography>
-              <Typography variant='body2'>Vui lòng đăng nhập đến vào hệ thống</Typography>
+              <Typography variant='body2'>Các bước rất đơn giản</Typography>
             </Box>
           )}
 
-          <form autoComplete='off' onSubmit={onSubmit} className={failer ? 'hide' : ''}>
+          <form autoComplete='off' onSubmit={handleSendCodeClick} className={success ? 'hide' : ''}>
             <TextField
-              autoFocus
               fullWidth
-              id='email'
+              autoFocus
+              type='email'
               label='Email'
               sx={{ marginBottom: 4 }}
               value={email}
               onChange={event => setEmail(event.target.value)}
               required
+              className='mb-3'
             />
-            <FormControl fullWidth>
-              <InputLabel htmlFor='auth-login-password'>Mật Khẩu</InputLabel>
-              <OutlinedInput
-                label='Mật khẩu'
-                required
-                value={values.password}
-                id='auth-login-password'
-                onChange={handleChange('password')}
-                type={values.showPassword ? 'text' : 'password'}
-                endAdornment={
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      aria-label='toggle password visibility'
-                    >
-                      {values.showPassword ? <EyeOutline /> : <EyeOffOutline />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-            <Box
-              sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
-            >
-              {/* <FormControlLabel control={<Checkbox />} label='Remember Me' /> */}
-              <Link passHref href='/pages/forgot-password'>
-                <LinkStyled>Quên mật khẩu?</LinkStyled>
-              </Link>
-            </Box>
-            <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }} type='submit'>
-              Đăng Nhập
+
+            <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginBottom: 7 }}>
+              Quên Mật Khẩu
             </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Typography variant='body2' sx={{ marginRight: 2 }}>
-                Lần đầu đến với hệ thống?
-              </Typography>
               <Typography variant='body2'>
-                <Link passHref href='/pages/register'>
-                  <LinkStyled>Tạo tài khoản</LinkStyled>
+                <Link passHref href='/pages/login'>
+                  <LinkStyled>Trở về trang đang nhập</LinkStyled>
                 </Link>
               </Typography>
             </Box>
-            {/* <Divider sx={{ my: 5 }}>or</Divider>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Facebook sx={{ color: '#497ce2' }} />
-                </IconButton>
-              </Link>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Twitter sx={{ color: '#1da1f2' }} />
-                </IconButton>
-              </Link>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Github
-                    sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : theme.palette.grey[300]) }}
-                  />
-                </IconButton>
-              </Link>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Google sx={{ color: '#db4437' }} />
-                </IconButton>
-              </Link>
-            </Box> */}
           </form>
-          <form autoComplete='off' onSubmit={onSubmitConfirm} className={failer ? '' : 'hide'}>
+          <form autoComplete='off' onSubmit={handleConfirmClick} className={success ? '' : 'hide'}>
             <TextField
               fullWidth
               type='email'
@@ -340,6 +288,7 @@ const LoginPage = () => {
               onChange={event => setEmail(event.target.value)}
               required
             />
+
             <TextField
               fullWidth
               type='number'
@@ -348,9 +297,31 @@ const LoginPage = () => {
               value={code}
               onChange={event => setCode(event.target.value)}
               required
+              className='mt-3'
             />
-
-            <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginBottom: 7 }}>
+            <FormControl fullWidth>
+              <InputLabel htmlFor='auth-register-password'>Mật Khẩu Mới</InputLabel>
+              <OutlinedInput
+                label='Mật khẩu Mới'
+                value={values.newPassword}
+                id='auth-register-password'
+                onChange={handleChange('newPassword')}
+                type={values.showPassword ? 'text' : 'password'}
+                endAdornment={
+                  <InputAdornment position='end'>
+                    <IconButton
+                      edge='end'
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      aria-label='toggle password visibility'
+                    >
+                      {values.showPassword ? <EyeOutline fontSize='small' /> : <EyeOffOutline fontSize='small' />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+            <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginTop: 7 }}>
               Xác Nhận
             </Button>
           </form>
@@ -360,6 +331,6 @@ const LoginPage = () => {
     </Box>
   )
 }
-LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>
+ForgotPassword.getLayout = page => <BlankLayout>{page}</BlankLayout>
 
-export default LoginPage
+export default ForgotPassword

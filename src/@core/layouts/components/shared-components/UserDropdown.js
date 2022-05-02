@@ -74,6 +74,7 @@ const UserDropdown = () => {
   }
 
   useEffect(() => {
+
     getProfile()
       .then(results => {
         getTokenFCM(setTokenFound, results.data.id)
