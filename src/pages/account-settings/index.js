@@ -1,5 +1,6 @@
 // ** React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -23,6 +24,9 @@ import TabSecurity from 'src/views/account-settings/TabSecurity'
 // ** Third Party Styles Imports
 import 'react-datepicker/dist/react-datepicker.css'
 
+// ** Custom
+import UserPool from 'src/utils/UserPool'
+
 const Tab = styled(MuiTab)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     minWidth: 100
@@ -42,8 +46,19 @@ const TabName = styled('span')(({ theme }) => ({
 }))
 
 const AccountSettings = () => {
+
+  // ** Hook
+  const router = useRouter()
+
   // ** State
   const [value, setValue] = useState('account')
+  const user_logged = UserPool.getCurrentUser()
+
+  useEffect(() => {
+    if (!user_logged) {
+      router.push('/pages/login/')
+    }
+  })
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -62,7 +77,7 @@ const AccountSettings = () => {
             label={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <AccountOutline />
-                <TabName>Account</TabName>
+                <TabName>Tài Khoản</TabName>
               </Box>
             }
           />
@@ -71,7 +86,7 @@ const AccountSettings = () => {
             label={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <LockOpenOutline />
-                <TabName>Security</TabName>
+                <TabName>Thay Đổi Mật Khẩu</TabName>
               </Box>
             }
           />
@@ -80,7 +95,7 @@ const AccountSettings = () => {
             label={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <InformationOutline />
-                <TabName>Info</TabName>
+                <TabName>Thông Tin Nhân Viên</TabName>
               </Box>
             }
           />

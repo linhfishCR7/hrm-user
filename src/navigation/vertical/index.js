@@ -2,6 +2,7 @@
 import Login from 'mdi-material-ui/Login'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
+import CubeOutline from 'mdi-material-ui/CubeOutline'
 
 
 const navigation = () => {
@@ -12,16 +13,16 @@ const navigation = () => {
       path: '/'
     },
     {
-      title: 'Account Settings',
+      title: 'Tài Khoản Và Lý Lịch',
       icon: AccountCogOutline,
       path: '/account-settings'
     },
     {
-      sectionTitle: 'Pages'
+      sectionTitle: 'Quản Lý'
     },
     {
-      title: 'Login',
-      icon: Login,
+      title: 'Test',
+      icon: CubeOutline,
       path: '/pages/login',
       openInNewTab: true
     }
