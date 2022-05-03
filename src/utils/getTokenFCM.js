@@ -10,8 +10,6 @@ const getTokenFCM = (setTokenFound, user) => {
       })
       .then(token => {
         if (token) {
-            console.log('token')
-            console.log(token)
           setTokenFound(true)
           const data = { token: token, device: '', meid: '', user: user }
           axios
@@ -22,7 +20,7 @@ const getTokenFCM = (setTokenFound, user) => {
               },
               withCredentials: true
             })
-            .then(res => {console.log(res.data)})
+            .then(res => {})
             .catch(function (error) {})
         } else {
           setTokenFound(false)

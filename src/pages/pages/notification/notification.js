@@ -20,8 +20,8 @@ import { Badge } from 'antd'
 
 // ** Third Party Components
 import PerfectScrollbarComponent from 'react-perfect-scrollbar'
-import API from '../../../utils/apiCaller' //REGISTER_URL, ACTION, DATA = {}
-import Pool from '../../../utils/UserPool'
+import API from 'src/utils/apiCaller' //REGISTER_URL, ACTION, DATA = {}
+import Pool from 'src/utils/UserPool'
 
 // ** Icons Imports
 import BellOutline from 'mdi-material-ui/BellOutline'
