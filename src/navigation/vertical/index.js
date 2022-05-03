@@ -21,10 +21,10 @@ const navigation = () => {
       sectionTitle: 'Quản Lý'
     },
     {
-      title: 'Test',
+      title: 'Phép Năm',
       icon: CubeOutline,
-      path: '/pages/login',
-      openInNewTab: true
+      path: '/day-off-year',
+      // openInNewTab: true
     }
   ]
 }

@@ -80,6 +80,8 @@ const UserDropdown = () => {
         getTokenFCM(setTokenFound, results.data.id)
         setData(results.data.image.image_s3_url)
         setName(results.data.last_name + ' ' + results.data.first_name)
+        localStorage.setItem('staff_id', results.data.staff_id )
+        localStorage.setItem('staff_staff', results.data.staff_staff )
         if (results.data.is_active === false) {
           openNotificationWithIcon({
             type: 'error',

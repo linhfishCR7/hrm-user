@@ -24,15 +24,15 @@ import Close from 'mdi-material-ui/Close'
 // ** Third Party Imports
 import DatePicker from 'react-datepicker'
 
+// ** Styled Components
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+
 // ** Customer Imports
 import axios from 'src/utils/axios'
 import getProfile from 'src/utils/getProfile'
 import openNotificationWithIcon from 'src/utils/notification'
 import Loading from 'src/utils/loading'
 
-
-// ** Styled Components
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -58,6 +58,9 @@ const ResetButtonStyled = styled(Button)(({ theme }) => ({
   }
 }))
 
+const CustomInput = forwardRef((props, ref) => {
+  return <TextField inputRef={ref} label='Ngày Sinh' fullWidth {...props} />
+})
 
 const TabAccount = () => {
   // ** State
@@ -72,6 +75,7 @@ const TabAccount = () => {
   const [dayOfBirth, setDayOfBirth] = useState(null)
   const [key, setKey] = useState('')
   const [loading_spin, setLoadingSpin] = useState(true)
+  const [status, setStatus] = useState(false)
 
   useEffect(() => {
     getProfile()
@@ -81,7 +85,7 @@ const TabAccount = () => {
         setLastName(results.data.last_name)
         setPhone(results.data.phone)
         setImgSrc(results.data.image.image_s3_url)
-        setDayOfBirth(results.data.date_of_birth)
+        setDayOfBirth(new Date(results.data.date_of_birth))
         setLoadingSpin(false)
       })
       .catch( (error) => {
@@ -98,12 +102,8 @@ const TabAccount = () => {
       })
   }, [])
 
-  const CustomInput = forwardRef((props, ref) => {
-    return <TextField inputRef={ref} label='Ngày Sinh' fullWidth {...props} value={dayOfBirth}
-    onChange={event => setDayOfBirth(event.target.value)} />
-  })
-
   const onChange = file => {
+    setStatus(true)
     const reader = new FileReader()
     const { files } = file.target
     if (files && files.length !== 0) {
@@ -136,6 +136,7 @@ const TabAccount = () => {
             const key_data = { image: key }
             console.log(key_data)
             updateProfile(key_data)
+            setStatus(false)
             openNotificationWithIcon({
               type: 'success',
               message: 'Upload hình đại diện thành công!!!',
@@ -144,14 +145,11 @@ const TabAccount = () => {
             })
           })
           .catch((error) => {
-            message.error({
-              content: JSON.stringify(error),
-              duration: 5,
-              maxCount: 1,
-              className: 'custom-class',
-              style: {
-                marginTop: '20vh',
-              },
+            openNotificationWithIcon({
+              type: 'error',
+              message: 'Upload hình đại diện không thành công!!!',
+              description: JSON.stringify(error),
+              placement: 'topRight',
             })
           })
       })
@@ -162,6 +160,7 @@ const TabAccount = () => {
           description: 'Chỉ hỗ trợ hình ảnh dạng png, jepg và jpg',
           placement: 'topRight',
         })
+        setStatus(false)
       })
       reader.onload = () => setImgSrc(imgSrc)
     }
@@ -186,7 +185,7 @@ const TabAccount = () => {
       first_name: firstName,
       last_name: lastName,
       phone: phone,
-      date_of_birth: dayOfBirth,
+      date_of_birth: dayOfBirth.toISOString().slice(0, 10),
     }
     console.log(data)
     updateProfile(data)
@@ -220,7 +219,7 @@ const TabAccount = () => {
 
   return (
     <>
-    <Loading loading={loading_spin} />
+    {/* <Loading loading={loading_spin} /> */}
     <CardContent>
       <form onSubmit={onSubmit}>
         <Grid container spacing={7}>
@@ -229,7 +228,7 @@ const TabAccount = () => {
               <ImgStyled src={imgSrc ? imgSrc : '/images/avatars/1.png'} alt='Hình Đại Diện' />
               <Box>
                 <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload Hình Đại Diện
+                  { status ? 'Vui Lòng Chờ...' : 'Upload Hình Đại Diện' }
                   <input
                     hidden
                     type='file'
@@ -264,6 +263,29 @@ const TabAccount = () => {
               onChange={event => setFirstName(event.target.value)} />
           </Grid>
           <Grid item xs={12} sm={6}>
+            <TextField 
+              fullWidth
+              type='tel'
+              label='Số Điện Thoại' 
+              placeholder='Số Điện Thoại' 
+              value={phone}
+              onChange={event => setPhone(event.target.value)} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <DatePickerWrapper>
+              <DatePicker
+                selected={dayOfBirth}
+                showYearDropdown
+                showMonthDropdown
+                id='account-settings-date'
+                placeholderText='MM-DD-YYYY'
+                customInput={<CustomInput />}
+                onChange={dayOfBirth => setDayOfBirth(dayOfBirth)}
+                // dateFormat='yyyy-MM-dd'
+              />
+            </DatePickerWrapper>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               type='email'
@@ -272,74 +294,6 @@ const TabAccount = () => {
               value={email}
               onChange={event => setEmail(event.target.value)}
               readOnly='readonly'
-            />
-          </Grid>
-          {/* <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select label='Role' defaultValue='admin'>
-                <MenuItem value='admin'>Admin</MenuItem>
-                <MenuItem value='author'>Author</MenuItem>
-                <MenuItem value='editor'>Editor</MenuItem>
-                <MenuItem value='maintainer'>Maintainer</MenuItem>
-                <MenuItem value='subscriber'>Subscriber</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid> */}
-          <Grid item xs={12} sm={6}>
-            <DatePickerWrapper>
-              <DatePicker
-                selected={date}
-                showYearDropdown
-                showMonthDropdown
-                id='account-settings-date'
-                placeholderText='MM-DD-YYYY'
-                customInput={<CustomInput />}
-                onChange={date => setDate(date)}
-              />
-            </DatePickerWrapper>
-          </Grid>
-          {/* <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select label='Status' defaultValue='active'>
-                <MenuItem value='active'>Active</MenuItem>
-                <MenuItem value='inactive'>Inactive</MenuItem>
-                <MenuItem value='pending'>Pending</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Company' placeholder='ABC Pvt. Ltd.' defaultValue='ABC Pvt. Ltd.' />
-          </Grid> */}
-
-          {/* {openAlert ? (
-            <Grid item xs={12} sx={{ mb: 3 }}>
-              <Alert
-                severity='warning'
-                sx={{ '& a': { fontWeight: 400 } }}
-                action={
-                  <IconButton size='small' color='inherit' aria-label='close' onClick={() => setOpenAlert(false)}>
-                    <Close fontSize='inherit' />
-                  </IconButton>
-                }
-              >
-                <AlertTitle>Your email is not confirmed. Please check your inbox.</AlertTitle>
-                <Link href='/' onClick={e => e.preventDefault()}>
-                  Resend Confirmation
-                </Link>
-              </Alert>
-            </Grid>
-          ) : null} */}
-
-          <Grid item xs={12} sm={6}>
-            <TextField 
-              fullWidth 
-              type='tel' 
-              label='Phone' 
-              placeholder='+84456789067'
-              value={phone}
-              onChange={event => setPhone(event.target.value)}
             />
           </Grid>
 
