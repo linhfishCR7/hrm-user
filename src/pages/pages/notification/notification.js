@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography'
 // import BellOutline from 'mdi-material-ui/BellOutline'
 
 import PropTypes from 'prop-types'
-import { Badge } from 'antd'
+import { Badge, Popover } from 'antd'
 
 // ** Third Party Components
 import PerfectScrollbarComponent from 'react-perfect-scrollbar'
@@ -187,27 +187,47 @@ const NotificationDropdown = () => {
           </Box>
         </MenuItem>
         <ScrollWrapper>
-          {data.map(item => (
-            <MenuItem onClick={() => handleReadOne(item.id)} key={item.id}>
-              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-                <Avatar alt={item.first_name_data ? item.first_name_data : 'Image'} src={item.user_image} />
-                <Box
-                  sx={{
-                    mx: 4,
-                    flex: '1 1',
-                    display: 'flex',
-                    overflow: 'hidden',
-                    flexDirection: 'column'
-                  }}
-                >
-                  <MenuItemTitle>{item.title}</MenuItemTitle>
-                  <MenuItemSubtitle variant='body2'>{item.body}</MenuItemSubtitle>
+          {data.map((item) => (
+            <Popover
+              key={item.index}
+              placement="left"
+              content={
+                <>
+                  <div>
+                    <p>{item.body}</p>
+                    <p>{item.created_at_data}</p>
+                  </div>
+                </>
+              }
+              title={item.title}
+            >
+              <MenuItem onClick={() => handleReadOne(item.id)} key={item.id}>
+                <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    alt={item.first_name_data ? item.first_name_data : 'Image'}
+                    src={item.user_image}
+                  />
+                  <Box
+                    sx={{
+                      mx: 4,
+                      flex: '1 1',
+                      display: 'flex',
+                      overflow: 'hidden',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <MenuItemTitle>{item.title}</MenuItemTitle>
+                    <MenuItemSubtitle variant="body2">{item.body}</MenuItemSubtitle>
+                  </Box>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: 'text.disabled', fontSize: '0.65rem' }}
+                  >
+                    {item.created_at_data}
+                  </Typography>
                 </Box>
-                <Typography variant='caption' sx={{ color: 'text.disabled' }}>
-                  {item.created_at_data}
-                </Typography>
-              </Box>
-            </MenuItem>
+              </MenuItem>
+            </Popover>
           ))}
         </ScrollWrapper>
         <MenuItem

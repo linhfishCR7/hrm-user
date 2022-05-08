@@ -25,6 +25,12 @@ const navigation = () => {
       icon: CubeOutline,
       path: '/day-off-year',
       // openInNewTab: true
+    },
+    {
+      title: 'Bảng Lương',
+      icon: CubeOutline,
+      path: '/salary',
+      // openInNewTab: true
     }
   ]
 }
