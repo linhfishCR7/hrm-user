@@ -27,6 +27,7 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // ** Global css styles
 import '../../styles/globals.css'
+import 'antd/dist/antd.css' // or 'antd/dist/antd.less'
 
 const clientSideEmotionCache = createEmotionCache()
 
