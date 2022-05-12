@@ -5,6 +5,7 @@ import 'antd/dist/antd.css' // or 'antd/dist/antd.less'
 import Loading from 'src/utils/loading'
 
 import API from 'src/utils/apiCaller' //REGISTER_URL, ACTION, DATA = {}
+
 const { Option } = Select
 
 const Salary = () => {
@@ -65,6 +66,7 @@ const Salary = () => {
               placeholder='Tìm kiếm theo tháng và năm'
               optionFilterProp='children'
               filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+
               //   filterSort={(optionA, optionB) =>
               //     optionA.children.toLowerCase().localeCompare(optionB.children.toLowerCase())
               //   }
@@ -94,4 +96,5 @@ const Salary = () => {
     </>
   )
 }
+
 export default Salary
