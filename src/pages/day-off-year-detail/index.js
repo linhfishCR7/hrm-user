@@ -34,7 +34,21 @@ import Loading from 'src/utils/loading'
 // ** Ant Design Import
 import { Modal, Input } from 'antd'
 import 'antd/dist/antd.css' // or 'antd/dist/antd.less'
-
+import {
+  EditOutlined,
+  ThunderboltOutlined,
+  CalculatorOutlined,
+  RiseOutlined,
+  EllipsisOutlined,
+  SettingOutlined,
+  DollarOutlined,
+  ClockCircleOutlined,
+  IdcardOutlined,
+  FileProtectOutlined,
+  PlusCircleOutlined,
+  InfoCircleOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons'
 import {
   CModal,
   CModalBody,
@@ -327,7 +341,7 @@ const DayOffYearDetail = () => {
           <Card>
             <CardHeader title='DANH SÁCH PHÉP NĂM CHI TIẾT' titleTypographyProps={{ variant: 'h6' }} />
             <Button variant='contained' sx={{ marginBottom: 7, marginLeft: 7 }} onClick={() => setOpenModalVisibleAdd()}>
-              <BookPlus /> Thêm Chi Tiết Phép Năm
+            <PlusCircleOutlined /> Thêm chi tiết phép năm
             </Button>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               <TableContainer sx={{ maxHeight: 440 }}>
@@ -376,7 +390,7 @@ const DayOffYearDetail = () => {
                           <TableCell align='left' sx={{ minWidth: 250 }}>
                             <Tooltip arrow title='Cập Nhật Dữ Liệu' placement='top'>
                               <Button variant='contained' color='warning' key='2' sx={{ marginRight: 1 }} size='small' onClick={() => setOpenModalVisibleEdit(item)}>
-                                <BookEdit />
+                              <EditOutlined />
                               </Button>
                             </Tooltip>
                             <Tooltip arrow title='Xoá Dữ Liệu' placement='top'>
@@ -387,7 +401,7 @@ const DayOffYearDetail = () => {
                                 size='small'
                                 onClick={() => setOpenModalVisible(item)}
                               >
-                                <BookRemove />
+                                <DeleteOutlined />
                               </Button>
                             </Tooltip>
                           </TableCell>

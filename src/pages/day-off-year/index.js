@@ -55,6 +55,21 @@ import {
   CFormText,
 } from '@coreui/react'
 import '@coreui/coreui/dist/css/coreui.min.css'
+import {
+  EditOutlined,
+  ThunderboltOutlined,
+  CalculatorOutlined,
+  RiseOutlined,
+  EllipsisOutlined,
+  SettingOutlined,
+  DollarOutlined,
+  ClockCircleOutlined,
+  IdcardOutlined,
+  FileProtectOutlined,
+  PlusCircleOutlined,
+  InfoCircleOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons'
 
 const { TextArea } = Input
 
@@ -222,7 +237,7 @@ const DayOffYear = () => {
           openNotificationWithIcon({
             type: 'error',
             message: 'Thêm dữ liệu không thành công!!!',
-            description: error.response.data.message,
+            description: '',
             placement: 'topRight',
           })
           setCloseModalVisibleAdd()
@@ -230,7 +245,7 @@ const DayOffYear = () => {
           openNotificationWithIcon({
             type: 'error',
             message: 'Thêm dữ liệu không thành công!!!',
-            description: error,
+            description: '',
             placement: 'topRight',
           })
           setCloseModalVisibleAdd()
@@ -275,7 +290,7 @@ const DayOffYear = () => {
           openNotificationWithIcon({
             type: 'error',
             message: 'Cập nhật dữ liệu không thành công!!!',
-            description: error.response.data.message,
+            description: '',
             placement: 'topRight',
           })
           setCloseModalVisibleEdit()
@@ -283,7 +298,7 @@ const DayOffYear = () => {
           openNotificationWithIcon({
             type: 'error',
             message: 'Cập nhật dữ liệu không thành công!!!',
-            description: error,
+            description: '',
             placement: 'topRight',
           })
           setCloseModalVisibleEdit()
@@ -311,9 +326,9 @@ const DayOffYear = () => {
       <Grid container spacing={6}>
         <Grid item xs={12}>
           <Card>
-            <CardHeader title='DANH SÁCH PHÉP NĂM' titleTypographyProps={{ variant: 'h6' }} />
+            <CardHeader title='Danh sách phép năm' titleTypographyProps={{ variant: 'h6' }} />
             <Button variant='contained' sx={{ marginBottom: 7, marginLeft: 7 }} onClick={() => setOpenModalVisibleAdd()}>
-              <BookPlus /> Thêm Phép Năm
+            <PlusCircleOutlined /> Thêm phép năm
             </Button>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               <TableContainer sx={{ maxHeight: 440 }}>
@@ -350,13 +365,13 @@ const DayOffYear = () => {
                           <TableCell align='left' sx={{ minWidth: 250 }}>
                             <Tooltip arrow title='Chi Tiết Phép Năm' placement='top'>
                               <Button variant='contained' color='info' key='1' sx={{ marginRight: 1 }} size='small' onClick={() => handleDetail(item)}>
-                                <BookSettings />
+                              <InfoCircleOutlined />
                               </Button>
                             </Tooltip>
 
                             <Tooltip arrow title='Cập Nhật Dữ Liệu' placement='top'>
                               <Button variant='contained' color='warning' key='2' sx={{ marginRight: 1 }} size='small' onClick={() => setOpenModalVisibleEdit(item)}>
-                                <BookEdit />
+                              <EditOutlined />
                               </Button>
                             </Tooltip>
                             <Tooltip arrow title='Xoá Dữ Liệu' placement='top'>
@@ -367,7 +382,7 @@ const DayOffYear = () => {
                                 size='small'
                                 onClick={() => setOpenModalVisible(item)}
                               >
-                                <BookRemove />
+                                <DeleteOutlined />
                               </Button>
                             </Tooltip>
                           </TableCell>
