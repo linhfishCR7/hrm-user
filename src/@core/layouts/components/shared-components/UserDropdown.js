@@ -89,7 +89,6 @@ const UserDropdown = () => {
             description: 'Vui lòng liên hệ Admin để biết thêm chi tiết',
             placement: 'topRight'
           })
-          user.signOut()
           localStorage.removeItem('token')
           router.push('/pages/login')
         }
@@ -103,7 +102,6 @@ const UserDropdown = () => {
               description: '',
               placement: 'topRight'
             })
-            user.signOut()
             localStorage.removeItem('token')
             router.push('/pages/login')
           }
