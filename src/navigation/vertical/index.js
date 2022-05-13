@@ -31,32 +31,38 @@ const navigation = () => {
       path: '/account-settings'
     },
     {
-      sectionTitle: 'Quản Lý'
-    },
-    {
-      title: 'Phép năm',
+      title: 'Cập nhật phép năm',
       icon: ClockCircleOutlined,
       path: '/day-off-year',
       // openInNewTab: true
     },
     {
-      title: 'Bảng lương',
+      sectionTitle: 'Quản Lý'
+    },
+    {
+      title: 'Phiếu phép năm',
+      icon: ClockCircleOutlined,
+      path: '/day-off-year-report',
+      // openInNewTab: true
+    },
+    {
+      title: 'Phiếu lương',
       icon: DollarOutlined,
       path: '/salary',
       // openInNewTab: true
     }
     ,
     {
-      title: 'CV',
+      title: 'Phiếu CV',
       icon: IdcardOutlined,
       path: '/cv',
       // openInNewTab: true
     }
     ,
     {
-      title: 'Hợp đồng lao động',
+      title: 'Phiếu hợp đồng',
       icon: FileProtectOutlined,
-      path: '/cv',
+      path: '/contract',
       // openInNewTab: true
     }
   ]
