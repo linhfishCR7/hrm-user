@@ -431,7 +431,7 @@ const DayOffYear = () => {
           onOk={handleDelete}
           onCancel={() => setCloseModalVisible(false)}
         >
-          <h2 style={{ textAlign: 'center' }}>Bạn Có Chắc Chắn Xoá?</h2>
+          <h6 style={{ textAlign: 'center' }}>Bạn Có Chắc Chắn Xoá?</h6>
       </Modal>
       
       <Modal
