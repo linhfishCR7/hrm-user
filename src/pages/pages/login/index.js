@@ -118,6 +118,8 @@ const LoginPage = () => {
             })
             router.push('/pages/login')
           } else {
+            localStorage.setItem('staff_id', results.data.staff_id )
+            localStorage.setItem('staff_staff', results.data.staff_staff )
             router.push('/')
           }
         })
