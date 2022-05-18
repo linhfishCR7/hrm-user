@@ -9,7 +9,6 @@ const GetProfile = async () => {
       Authorization: `Bearer ${token}`,
       'Access-Control-Allow-Origin': '*'
     },
-    withCredentials: true
   })
 }
 export default GetProfile

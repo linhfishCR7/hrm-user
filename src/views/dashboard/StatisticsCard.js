@@ -29,13 +29,12 @@ const StatisticsCard = () => {
   const [project, setProject] = useState(0)
   const [time, setTime] = useState(0)
   const [loading_spin, setLoadingSpin] = useState(true)
+
   useEffect(() => {
     const staff_id = localStorage.getItem('staff_id')
-
     API({ REGISTER_URL: '/user/dashboard/?staff=' + staff_id, ACTION: 'GET' })
       .then(results => {
         setDay(results.data.total_day_off_year)
-        console.log(results.data.total_day_off_year)
         setSalary(results.data.total_salary)
         setProject(results.data.total_project)
         setTime(results.data.total_time_keeping)
@@ -45,6 +44,7 @@ const StatisticsCard = () => {
         console.log(error)
       })
   }, [])
+  
   const salesData = [
     {
       stats:  day,

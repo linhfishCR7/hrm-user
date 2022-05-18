@@ -112,7 +112,6 @@ const RegisterPage = () => {
 
     const result = await axios.get(REGISTER_URL, {
       headers: { 'Content-Type': 'application/json' },
-      withCredentials: true
     })
 
     return result

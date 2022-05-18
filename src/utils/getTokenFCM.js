@@ -18,7 +18,6 @@ const getTokenFCM = (setTokenFound, user) => {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${localStorage.getItem('token')}`
               },
-              withCredentials: true
             })
             .then(res => {})
             .catch(function (error) {})
