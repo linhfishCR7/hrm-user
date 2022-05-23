@@ -1,6 +1,6 @@
 import { CContainer, CRow, CCol } from '@coreui/react'
 import React, { useRef, useState, useEffect, useCallback } from 'react'
-import { Select, Divider} from 'antd'
+import { Select, Divider } from 'antd'
 import 'antd/dist/antd.css' // or 'antd/dist/antd.less'
 import Loading from 'src/utils/loading'
 import API from 'src/utils/apiCaller' //REGISTER_URL, ACTION, DATA = {}
@@ -16,7 +16,7 @@ const DayOffYearReport = () => {
   const fetchListDayAPI = () => {
     const staff_id = localStorage.getItem('staff_id')
     API({
-      REGISTER_URL: '/user/day-off-years/list-day-off-year/?no_pagination=true&staff__id=' + staff_id,
+      REGISTER_URL: '/user/day-off-years/?no_pagination=true&staff__id=' + staff_id,
       ACTION: 'GET'
     })
       .then(res => {
@@ -33,10 +33,7 @@ const DayOffYearReport = () => {
     const staff_id = localStorage.getItem('staff_id')
     API({
       REGISTER_URL:
-        '/user/day-off-years/list-day-off-year/?no_pagination=true&staff__id=' +
-        staff_id +
-        '&id=' +
-        dataday,
+        '/user/day-off-years/list-day-off-year/?no_pagination=true&staff__id=' + staff_id + '&id=' + dataday,
       ACTION: 'GET'
     })
       .then(res => {
